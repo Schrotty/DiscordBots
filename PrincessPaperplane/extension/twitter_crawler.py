@@ -7,7 +7,7 @@ import requests
 from discord import TextChannel
 from discord.ext import tasks
 
-from ext import HTTP_CODES
+from extension import HTTP_CODES
 
 
 def fetch_tweets(queue: Queue):

@@ -15,9 +15,9 @@ from utility.db import DB
 
 
 class Rank(commands.Cog):
-    def __init__(self, bot : commands.Bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.DB : DB = bot.get_cog(Cogs.DB.value)
+        self.DB: DB = bot.get_cog(Cogs.DB.value)
         self.base_xp = xp_config.BASE
         self.random_xp_range = xp_config.RANDOM_RANGE
 
@@ -26,14 +26,14 @@ class Rank(commands.Cog):
         await self.handle_user_message_xp(message)
 
     async def handle_user_message_xp(self, message: Message) -> None:
-        author : Member = message.author
-        channel : TextChannel = message.channel
-        guild : Guild = message.guild
+        author: Member = message.author
+        channel: TextChannel = message.channel
+        guild: Guild = message.guild
 
         if author.id in guild_config.IGNORE_LIST:
             return
 
-        level_channel : TextChannel
+        level_channel: TextChannel
         level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
 
         if author.id == self.bot.user.id:
@@ -94,10 +94,15 @@ class Rank(commands.Cog):
 
                             # remove old reward-roles
                             if guild.id == guild_config.SERVER_LIVE:
-                                await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
-                                cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
+                                await level_channel.send(
+                                    author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
+                                cur.execute(
+                                    "SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1",
+                                    (level,))
                             if guild.id == guild_config.SERVER_TEST:
-                                cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
+                                cur.execute(
+                                    "SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1",
+                                    (level,))
 
                             rows = cur.fetchall()
                             for row in rows:
@@ -108,22 +113,30 @@ class Rank(commands.Cog):
 
                     # update user in database with new XP (+ level)
                     if guild.id == guild_config.SERVER_LIVE:
-                        cur.execute("UPDATE user_info SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s", (author.name, exp, time.time(), level, author.avatar_url, author.id,))
+                        cur.execute(
+                            "UPDATE user_info SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s",
+                            (author.name, exp, time.time(), level, author.avatar_url, author.id,))
                     if guild.id == guild_config.SERVER_TEST:
-                        cur.execute("UPDATE user_info_test SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s", (author.name, exp, time.time(), level, author.avatar_url, author.id,))
+                        cur.execute(
+                            "UPDATE user_info_test SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s",
+                            (author.name, exp, time.time(), level, author.avatar_url, author.id,))
 
             # add user to database if missing
             else:
                 self.add_user_to_db(cur, guild, author)
 
-    def add_user_to_db(self, cur, guild : Guild, author: Member) -> None:
+    def add_user_to_db(self, cur, guild: Guild, author: Member) -> None:
         exp = self.calc_xp_reward()
         if guild.id == guild_config.SERVER_LIVE:
-            cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
+            cur.execute(
+                "INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)",
+                (author.id, author.name, exp, time.time(), author.avatar_url,))
         if guild.id == guild_config.SERVER_TEST:
-            cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url,))
-    
-    def get_levelup_threshold(self, currentLevel : int) -> int:
+            cur.execute(
+                "INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)",
+                (author.id, author.name, exp, time.time(), author.avatar_url,))
+
+    def get_levelup_threshold(self, currentLevel: int) -> int:
         levelUp = 100
         if currentLevel > 0:
             levelUp = 5 * (currentLevel ** 2) + 50 * currentLevel + 100
@@ -143,10 +156,10 @@ class Rank(commands.Cog):
             ctx (commands.Context): [description]
             member (typing.Optional[discord.Member]): Member argument
         """
-        channel : TextChannel = ctx.channel
-        guild : Guild = ctx.guild
-        author : Member = ctx.author
-        
+        channel: TextChannel = ctx.channel
+        guild: Guild = ctx.guild
+        author: Member = ctx.author
+
         db = self.DB.connect()
         cur = db.cursor()
         db.autocommit(True)
@@ -160,10 +173,14 @@ class Rank(commands.Cog):
         if cur.rowcount == 0:
             exp = 0
             if guild.id == guild_config.SERVER_LIVE:
-                cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
+                cur.execute(
+                    "INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)",
+                    (author.id, author.name, exp, time.time(), author.avatar_url,))
                 cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
             if guild.id == guild_config.SERVER_TEST:
-                cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
+                cur.execute(
+                    "INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)",
+                    (author.id, author.name, exp, time.time(), author.avatar_url,))
                 cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
             row = cur.fetchone()
 
@@ -174,7 +191,7 @@ class Rank(commands.Cog):
         embed = self.create_rank_display_embed(guild, author, level, exp)
         await channel.send(embed=embed)
 
-    def create_rank_display_embed(self, guild : Guild, author: Member, level : int, exp: int) -> Embed:
+    def create_rank_display_embed(self, guild: Guild, author: Member, level: int, exp: int) -> Embed:
         # generate image with stats
         ext = ""
         if guild.id == guild_config.SERVER_TEST:

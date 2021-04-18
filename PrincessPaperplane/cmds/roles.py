@@ -9,6 +9,7 @@ from typing import List
 class EmoteRoleSettings:
     """Encapsulates data for role reactions based on emotes
     """
+
     def __init__(self, role_id: int, emote: str, text: str):
         self.role_id = role_id
         self.emote = emote
@@ -21,6 +22,7 @@ class Roles(commands.Cog):
         self.DB = bot.get_cog(Cogs.DB.value)
 
         # handle added reactions
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         await self.handle_role_reactions(payload)
@@ -29,25 +31,28 @@ class Roles(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         await self.handle_role_reactions(payload)
-    
+
     # update role message and add reactions
-    async def update_reaction_msg(self, roleChannel, emote_roles : List[EmoteRoleSettings]):
-        channel : TextChannel = self.bot.get_channel(id=roleChannel)
-        guild : Guild = channel.guild
-        msg : Message = None
-        
+    async def update_reaction_msg(self, roleChannel, emote_roles: List[EmoteRoleSettings]):
+        channel: TextChannel = self.bot.get_channel(id=roleChannel)
+        guild: Guild = channel.guild
+        msg: Message = None
+
         async for message in channel.history(limit=200):
             if message.author == self.bot.user:
                 msg = message
 
         if msg != None:
             for emote in msg.reactions:
-                if emote.me == True:
+                if emote.me:
                     await msg.remove_reaction(emote.emoji, self.bot.user)
         else:
-            msg = await channel.send("Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und wieder nehmen könnt. :boomerang:")
+            msg = await channel.send(
+                "Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und "
+                "wieder nehmen könnt. :boomerang:")
 
-        string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n"
+        string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder " \
+                 "nehmen könnt:\n "
         for emote_role in emote_roles:
             role = guild.get_role(role_id=emote_role.role_id)
 
@@ -63,17 +68,17 @@ class Roles(commands.Cog):
     # handle role reactions
     async def handle_role_reactions(self, payload):
         if payload.channel_id == guild_config.ROLE_CHANNEL:
-            emoji : Emoji = payload.emoji
-            guild : Guild = self.bot.get_guild(id=payload.guild_id)
-            user : Member = None
-            emote_roles : List[EmoteRoleSettings]
+            emoji: Emoji = payload.emoji
+            guild: Guild = self.bot.get_guild(id=payload.guild_id)
+            user: Member = None
+            emote_roles: List[EmoteRoleSettings]
             level = 0
-            level_channel : TextChannel
+            level_channel: TextChannel
 
-            self.DB.log("Check guild %s" % (guild.name))
+            self.DB.log("Check guild %s" % guild.name)
             self.DB.log("Check members")
             for member in guild.members:
-                self.DB.log("Check member %s" %(member.name))
+                self.DB.log("Check member %s" % member.name)
 
                 if member.id == payload.user_id:
                     self.DB.log("User found")
@@ -103,7 +108,8 @@ class Roles(commands.Cog):
             db.close()
 
             chosen_emote_role: EmoteRoleSettings
-            emote_role_matches : List[EmoteRoleSettings] = list(filter(lambda emote_role: emote_role.emote == emoji.name, emote_roles)) #Get matching emote
+            emote_role_matches: List[EmoteRoleSettings] = list(
+                filter(lambda emote_role: emote_role.emote == emoji.name, emote_roles))  # Get matching emote
             if len(emote_role_matches) <= 0:
                 # If not match was found, return
                 self.DB.log("No emote found")
@@ -114,18 +120,21 @@ class Roles(commands.Cog):
             role = guild.get_role(role_id=chosen_emote_role.role_id)
             self.DB.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
 
-            role : Roles
+            role: Roles
             if role in user.roles:
                 self.DB.log("Role " + role.name + " removed from " + user.name)
                 await user.remove_roles(role)
             else:
                 if chosen_emote_role.role_id in roles_config.ROLES_LEVEL:
                     if level >= roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id):
-                        self.DB.log("Role " + role.name + " with min-level " + str(roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id)) + " assigned to " + user.name)
+                        self.DB.log("Role " + role.name + " with min-level " + str(
+                            roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id)) + " assigned to " + user.name)
                         await user.add_roles(role)
                     else:
-                        await level_channel.send(user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id)) + ") für die Rolle " + role.name + " nicht!")
+                        await level_channel.send(
+                            user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(
+                                roles_config.ROLES_LEVEL.get(
+                                    chosen_emote_role.role_id)) + ") für die Rolle " + role.name + " nicht!")
                 else:
                     self.DB.log("Role " + role.name + " assigned to " + user.name)
                     await user.add_roles(role)
-

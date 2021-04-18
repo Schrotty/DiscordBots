@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  bot:
+    container_name: PaperBot
+    build: .
+    depends_on:
+      - database
+    links:
+      - "database:database"
+    volumes:
+    - .:/bot
+
+  database:
+    container_name: Database
+    image: "mariadb"
+    restart: always
+    volumes:
+      - ./resources/database-dumps:/docker-entrypoint-initdb.d
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: root
+      MYSQL_PASSWORD: example
+      MYSQL_DATABASE: princesspaperplane
+      MYSQL_ROOT_HOST: localhost

@@ -3,7 +3,7 @@ version: "3.9"
 services:
   bot:
     container_name: PaperBot
-    build: .
+    build: PrincessPaperplane
     depends_on:
       - database
     links:

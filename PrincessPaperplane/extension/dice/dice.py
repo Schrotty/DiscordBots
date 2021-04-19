@@ -46,7 +46,3 @@ class Dice(Cog):
             content = f'{content}{str(randint(1, dice))}'
 
         await ctx.channel.send(content=content)
-
-
-def setup(bot: Bot):
-    bot.add_cog(Dice(bot))

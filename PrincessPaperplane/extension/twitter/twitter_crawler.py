@@ -31,11 +31,3 @@ async def tweet_handler(bot, queue: Queue):
 
         author = tweet['includes']['users'][0]['username']
         await channel.send(f"https://twitter.com/{author}/status/{tweet['data']['id']}")
-
-
-def setup(bot):
-    print("> Loading twitter crawler")
-    q = Queue()
-
-    threading.Thread(target=fetch_tweets, args=(q,)).start()
-    tweet_handler.start(bot, q)

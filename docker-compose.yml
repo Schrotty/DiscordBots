@@ -16,7 +16,7 @@ services:
     image: "mariadb"
     restart: always
     volumes:
-      - ./resources/database-dumps:/docker-entrypoint-initdb.d
+      - ./PrincessPaperplane/resources/database-dumps:/docker-entrypoint-initdb.d
     ports:
       - '3306:3306'
     expose:

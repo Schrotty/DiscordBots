@@ -6,59 +6,63 @@ import os
 import traceback
 
 import discord
+from discord import Message, ChannelType
 from discord.ext.commands import Bot
 
 import extension
 from core import database
+from core.rank.rank import Rank
+from core.role.roles import Roles
 from utility import log
+from utility.terminal import Terminal
 
 
 class Paperbot(Bot):
     def __init__(self, command_prefix, **options):
-        log.setup()
-        # ROLES: Roles = self.get_cog(Cogs.ROLES.value)
-
         super().__init__(command_prefix, **options)
 
+        log.setup()
+        self.add_cog(Rank(self))
+        self.add_cog(Roles(self))
+
     def boot(self):
-        print("Starting PaperBot")
-        if os.getenv("PAPERBOT.DISCORD.API") is None:
-            return print("Unable to locate API key!")
+        Terminal.print('Starting PaperBot...')
+        if os.getenv('PAPERBOT.DISCORD.API') is None:
+            return Terminal.print('Unable to locate API key!')
 
-        return self.run(os.getenv("PAPERBOT.DISCORD.API"))
+        return self.run(os.getenv('PAPERBOT.DISCORD.API'))
 
-    # async def on_message(self, message):
-    #     if message.guild.id != guild_config.SERVER:  # TODO: Why?
-    #         return
+    async def on_message(self, message: Message):
+        if message.channel.type in [ChannelType.private, ChannelType.group]:
+            return
+
+        await self.process_commands(message)
 
     async def on_ready(self):
         try:
-            self.user.name = "PaperBot"
+            self.user.name = 'PaperBot'
 
             database.log('Bot started')
-            print('------')
-            print(f'DB.logged in as {self.user.name}#{self.user.id}')
-            print('------')
+            Terminal.print(f'Logged in as {self.user.name}#{self.user.id}')
+            Terminal.empty()
 
-            print('Connected to')
+            Terminal.print('Connected to')
             for guild in self.guilds:
-                print("- " + guild.name)
+                Terminal.print(f'- {guild.name}')
+
+            Terminal.empty()
 
             await self.change_presence(status=discord.Status.online,
                                        activity=discord.Activity(name='twitch.tv/princesspaperplane',
                                                                  type=discord.ActivityType.watching))
 
-            print('------')
-            print('Loading Extensions')
+            Terminal.print('Loading Extensions:')
             extension.load_extensions(self)
 
-            print('------')
+            Terminal.empty()
             # await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
             # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
-        except Exception:
-            database.log("Error: " + traceback.format_exc())
 
-    def add_cogs(self):
-        pass
-        # self.add_cog(Rank(self))
-        # self.add_cog(Roles(self))
+            Terminal.print('PaperBot started!')
+        except Exception:
+            database.log('Error: ' + traceback.format_exc())

@@ -1,10 +1,7 @@
-#!/usr/bin/python3
-# coding=utf-8
-
 from typing import List
-from cmds.roles import EmoteRoleSettings
 
-# level requirements for roles
+from core.role.emote_role_settings import EmoteRoleSettings
+
 ROLES_LEVEL = {
     763105108841332766: 5,
     763375085704577034: 5

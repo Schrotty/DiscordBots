@@ -1,13 +1,14 @@
 from discord.ext.commands import Bot
 
-HTTP_CODES = {
-    200: "All right!",
-    401: "You fucked up!",
-    418: "I'm a teapot!",
-    429: "Too many requests!"
-}
+from utility.terminal import Terminal
+
+EXTENSIONS = ["dice", "quotly", "wool"]
 
 
 def load_extensions(bot: Bot):
-    bot.load_extension("extension.dice")
-    bot.load_extension("extension.quotes")
+    for extension in EXTENSIONS:
+        bot.load_extension(f'extension.{extension}')
+        Terminal.print(f'- Loaded {extension.capitalize()}-Extension.')
+
+    Terminal.empty()
+    Terminal.print(f'Loaded {len(EXTENSIONS)} extensions!')

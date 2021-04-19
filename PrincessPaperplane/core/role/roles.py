@@ -1,25 +1,16 @@
-import configs.guild_config as guild_config
-import configs.roles_config as roles_config
+import core.rank.guild_config as guild_config
 from discord.ext import commands
 from discord import Member, Guild, Emoji, TextChannel, Message
-from utility.cogs_enum import Cogs
 from typing import List
 
-
-class EmoteRoleSettings:
-    """Encapsulates data for role reactions based on emotes
-    """
-
-    def __init__(self, role_id: int, emote: str, text: str):
-        self.role_id = role_id
-        self.emote = emote
-        self.text = text
+from core import database
+from core.role import ROLES_LEVEL, EMOTE_ROLES
+from core.role.emote_role_settings import EmoteRoleSettings
 
 
 class Roles(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.DB = bot.get_cog(Cogs.DB.value)
 
         # handle added reactions
 
@@ -42,7 +33,7 @@ class Roles(commands.Cog):
             if message.author == self.bot.user:
                 msg = message
 
-        if msg != None:
+        if msg is not None:
             for emote in msg.reactions:
                 if emote.me:
                     await msg.remove_reaction(emote.emoji, self.bot.user)
@@ -60,8 +51,8 @@ class Roles(commands.Cog):
             await msg.add_reaction(emote_role.emote)
 
             string = string + "\n" + emote_role.text
-            if emote_role.role_id in roles_config.ROLES_LEVEL:
-                string = "%s (mindestens Level %d)" % (string, roles_config.ROLES_LEVEL.get(emote_role.role_id))
+            if emote_role.role_id in ROLES_LEVEL:
+                string = "%s (mindestens Level %d)" % (string, ROLES_LEVEL.get(emote_role.role_id))
 
         await msg.edit(content=string)
 
@@ -75,66 +66,57 @@ class Roles(commands.Cog):
             level = 0
             level_channel: TextChannel
 
-            self.DB.log("Check guild %s" % guild.name)
-            self.DB.log("Check members")
+            database.log("Check guild %s" % guild.name)
+            database.log("Check members")
             for member in guild.members:
-                self.DB.log("Check member %s" % member.name)
+                database.log("Check member %s" % member.name)
 
                 if member.id == payload.user_id:
-                    self.DB.log("User found")
+                    database.log("User found")
                     user = member
                     break
 
             if user == self.bot.user:
                 return
 
-            if user == None:
-                self.DB.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
+            if user is None:
+                database.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
                 return
 
-            db = self.DB.connect()
-            cur = db.cursor()
-            db.autocommit(True)
-
-            emote_roles = roles_config.EMOTE_ROLES
+            emote_roles = EMOTE_ROLES
             level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
 
-            if payload.guild_id == guild_config.SERVER_LIVE:
-                cur.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
-            elif payload.guild_id == guild_config.SERVER_TEST:
-                cur.execute("SELECT level FROM user_info_test WHERE id = %s", (user.id,))
-            if cur.rowcount > 0:
-                level = cur.fetchone()[0]
-            db.close()
+            result = database.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
+            if result.rowcount > 0:
+                level = result.fetchone()[0]
 
             chosen_emote_role: EmoteRoleSettings
             emote_role_matches: List[EmoteRoleSettings] = list(
                 filter(lambda emote_role: emote_role.emote == emoji.name, emote_roles))  # Get matching emote
             if len(emote_role_matches) <= 0:
                 # If not match was found, return
-                self.DB.log("No emote found")
-                return
+                return database.log("No emote found")
             else:
                 chosen_emote_role = emote_role_matches[0]
 
             role = guild.get_role(role_id=chosen_emote_role.role_id)
-            self.DB.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
+            database.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
 
             role: Roles
             if role in user.roles:
-                self.DB.log("Role " + role.name + " removed from " + user.name)
+                database.log("Role " + role.name + " removed from " + user.name)
                 await user.remove_roles(role)
             else:
-                if chosen_emote_role.role_id in roles_config.ROLES_LEVEL:
-                    if level >= roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id):
-                        self.DB.log("Role " + role.name + " with min-level " + str(
-                            roles_config.ROLES_LEVEL.get(chosen_emote_role.role_id)) + " assigned to " + user.name)
+                if chosen_emote_role.role_id in ROLES_LEVEL:
+                    if level >= ROLES_LEVEL.get(chosen_emote_role.role_id):
+                        database.log("Role " + role.name + " with min-level " + str(
+                            ROLES_LEVEL.get(chosen_emote_role.role_id)) + " assigned to " + user.name)
                         await user.add_roles(role)
                     else:
                         await level_channel.send(
                             user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(
-                                roles_config.ROLES_LEVEL.get(
+                                ROLES_LEVEL.get(
                                     chosen_emote_role.role_id)) + ") für die Rolle " + role.name + " nicht!")
                 else:
-                    self.DB.log("Role " + role.name + " assigned to " + user.name)
+                    database.log("Role " + role.name + " assigned to " + user.name)
                     await user.add_roles(role)

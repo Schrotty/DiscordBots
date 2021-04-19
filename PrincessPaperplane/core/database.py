@@ -32,6 +32,10 @@ def execute(query: Any, args: Any = None) -> Any:
     return cursor
 
 
+def exist(table: str) -> bool:
+    return execute("SHOW TABLES LIKE %s", (table,)).rowcount > 0
+
+
 def log(message: str):
     """Log text in console and in database
 
@@ -39,5 +43,5 @@ def log(message: str):
         message (string): Text to be logged
     """
 
-    # logging.info(message)
+    # logging.getLogger('paperbot').error(message)
     execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (message, time.time(),))

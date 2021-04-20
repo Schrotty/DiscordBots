@@ -1,10 +1,9 @@
-import time
 import os
+import time
 from typing import Any
 
 import MySQLdb
 from MySQLdb.cursors import Cursor
-import logging
 
 
 def connect() -> MySQLdb.Connection:

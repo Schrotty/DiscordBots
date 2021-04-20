@@ -3,7 +3,7 @@ import random
 from discord.ext import commands
 from discord.ext.commands import Context, Cog, Bot
 
-from core import database
+from core import Database
 from extension.quotly.quote import Quote, EMPTY
 
 ROLES_WITH_WRITE_ACCESS = 'Schrotty', 763889848149999627  # Discord Roles
@@ -14,7 +14,7 @@ class Quotly(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-        if not database.exist("quotes"):
+        if not Database.exist("quotes"):
             self.setup()
 
         # self.twitch: Twitch = bot.get_cog(Cogs.TWITCH.value)
@@ -24,7 +24,7 @@ class Quotly(Cog):
 
     @staticmethod
     def setup() -> None:
-        database.execute(
+        Database.execute(
             'CREATE TABLE quotes(id int auto_increment primary key, quote text not null, author text not null);'
         )
 
@@ -34,7 +34,7 @@ class Quotly(Cog):
 
     @staticmethod
     def fetch_quote() -> Quote:
-        result = database.execute('SELECT id, quote, author FROM quotes')
+        result = Database.execute('SELECT id, quote, author FROM quotes')
         if result.rowcount <= 0:
             return EMPTY
 
@@ -42,8 +42,8 @@ class Quotly(Cog):
 
     @staticmethod
     def store_quote(text: str, author: str) -> Quote:
-        database.execute('INSERT INTO quotes (quote, author) VALUES (%s, %s)', (text, author,))
-        result = database.execute('SELECT id, quote, author FROM quotes WHERE id = (SELECT MAX(id) FROM quotes)')
+        Database.execute('INSERT INTO quotes (quote, author) VALUES (%s, %s)', (text, author,))
+        result = Database.execute('SELECT id, quote, author FROM quotes WHERE id = (SELECT MAX(id) FROM quotes)')
 
         return Quote(result.fetchone())
 

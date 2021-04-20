@@ -2,8 +2,8 @@ import os
 import re
 from random import randint
 
-from discord.ext.commands import Bot, Cog
 from discord.ext import commands
+from discord.ext.commands import Bot, Cog
 
 
 class Dice(Cog):

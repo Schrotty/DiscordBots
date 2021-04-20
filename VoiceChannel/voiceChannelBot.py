@@ -5,28 +5,33 @@ import discord
 from discord.ext import commands
 
 bot = commands.Bot(command_prefix='!')
+
+
 @bot.event
 async def on_ready():
     global VOICE_CREATE
-    VOICE_CREATE = bot.get_channel(id=0) # channel ID
+    VOICE_CREATE = bot.get_channel(id=0)  # channel ID
+
 
 @bot.event
 async def on_voice_state_update(member, before, after):
     global VOICE_CREATE
 
-    if after.channel != None:
+    if after.channel is not None:
         # Joined creation channel
         if after.channel.id == VOICE_CREATE.id:
             channelname = member.name + "'s Sprachchannel"
-            voice = await VOICE_CREATE.category.create_voice_channel(channelname, overwrites=None, reason="Created by user")
+            voice = await VOICE_CREATE.category.create_voice_channel(channelname, overwrites=None,
+                                                                     reason="Created by user")
             await voice.set_permissions(member, read_messages=True, send_messages=False)
             await member.move_to(voice)
 
-    if before.channel != None:
+    if before.channel is not None:
         # Delete if channel is empty
         if before.channel.category == VOICE_CREATE.category and before.channel.id != VOICE_CREATE.id:
             if len(before.channel.members) == 0:
                 await before.channel.delete(reason="Empty user channel")
+
 
 @bot.event
 async def on_message(message):
@@ -39,4 +44,5 @@ async def on_message(message):
                     if user.name in voice.name:
                         await voice.edit(name=message.content + " - by " + user.name)
 
-bot.run("") # API-Key des Bots
+
+bot.run("")  # API-Key des Bots

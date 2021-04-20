@@ -2,6 +2,8 @@ from typing import List
 
 from core.role.emote_role_settings import EmoteRoleSettings
 
+__all__ = ['EmoteRoleSettings', 'ROLES_LEVEL', 'EMOTE_ROLES', 'EMOTE_ROLES_TEST']
+
 ROLES_LEVEL = {
     763105108841332766: 5,
     763375085704577034: 5

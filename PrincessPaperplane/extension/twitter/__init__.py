@@ -3,6 +3,7 @@ import threading
 from queue import Queue
 
 from dotenv import load_dotenv, find_dotenv
+
 from extension.twitter.twitter_crawler import fetch_tweets, tweet_handler
 
 

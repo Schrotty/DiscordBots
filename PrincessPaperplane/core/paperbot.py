@@ -10,10 +10,10 @@ from discord import Message, ChannelType
 from discord.ext.commands import Bot
 
 import extension
-from core import database
+from core import Database
+from core.admin import AdminCommands
 from core.rank.rank import Rank
 from core.role.roles import Roles
-from utility import log
 from utility.terminal import Terminal
 
 
@@ -21,7 +21,8 @@ class Paperbot(Bot):
     def __init__(self, command_prefix, **options):
         super().__init__(command_prefix, **options)
 
-        log.setup()
+        # log.setup()
+        self.add_cog(AdminCommands(self))
         self.add_cog(Rank(self))
         self.add_cog(Roles(self))
 
@@ -42,8 +43,16 @@ class Paperbot(Bot):
         try:
             self.user.name = 'PaperBot'
 
-            database.log('Bot started')
+            Database.log('Bot started')
             Terminal.print(f'Logged in as {self.user.name}#{self.user.id}')
+            Terminal.empty()
+
+            Terminal.print('Loaded configuration follows:')
+
+            Terminal.print(
+                f'- LEVEL_CHANNEL -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))}')
+            Terminal.print(f'- BOT_CHANNEL   -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.BOT_CHANNEL")))}')
+            Terminal.print(f'- ROLE_CHANNEL  -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.ROLE_CHANNEL")))}')
             Terminal.empty()
 
             Terminal.print('Connected to')
@@ -65,4 +74,4 @@ class Paperbot(Bot):
 
             Terminal.print('PaperBot started!')
         except Exception:
-            database.log('Error: ' + traceback.format_exc())
+            Database.log('Error: ' + traceback.format_exc())

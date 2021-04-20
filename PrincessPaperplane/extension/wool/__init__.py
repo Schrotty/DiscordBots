@@ -1,4 +1,5 @@
 from discord.ext.commands import Bot
+
 from extension.wool.wool import Wool
 
 

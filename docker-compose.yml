@@ -9,7 +9,7 @@ services:
     links:
       - "database:database"
     volumes:
-    - .:/bot
+      - .:/bot
 
   database:
     container_name: MariaDB

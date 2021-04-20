@@ -6,6 +6,13 @@ from discord.ext import commands
 class Checks:
 
     @staticmethod
+    def is_not_in_list(user_list: list):
+        async def predicate(ctx):
+            return ctx.message.author.id not in user_list
+
+        return commands.check(predicate)
+
+    @staticmethod
     def is_channel(channel_id: int, check_on_server_id: Optional[int] = -1):
         """Checks if bot can accept commands in channel
 

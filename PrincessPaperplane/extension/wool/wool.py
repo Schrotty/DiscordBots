@@ -2,7 +2,7 @@ from discord import User
 from discord.ext import commands
 from discord.ext.commands import Context, Cog
 
-from core import database
+from core import Database
 
 
 class Wool(Cog):
@@ -14,4 +14,4 @@ class Wool(Cog):
         await ctx.channel.send(f'***Achtung!** {user.mention} will wieder Wolle kaufen!*')
 
     async def cog_command_error(self, ctx, error):
-        database.log(f'Wool -> "{error}"')
+        Database.log(f'Wool -> "{error}"')

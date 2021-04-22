@@ -1,14 +1,14 @@
 import os
-import time
 from typing import Any
 
 import MySQLdb
 from MySQLdb.cursors import Cursor
+from pony.orm import db_session
+
+from core.models.models import LogInfo
 
 
 class Database:
-    def __init__(self):
-        pass
 
     @staticmethod
     def connect() -> MySQLdb.Connection:
@@ -40,6 +40,7 @@ class Database:
         return Database.execute("SHOW TABLES LIKE %s", (table,)).rowcount > 0
 
     @staticmethod
+    @db_session
     def log(message: str):
         """Log text in console and in database
 
@@ -48,7 +49,7 @@ class Database:
         """
 
         # logging.getLogger('paperbot').error(message)
-        Database.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (message, time.time(),))
+        LogInfo(text=message)
 
     @staticmethod
     def ignored_user() -> list:

@@ -1,4 +1,3 @@
-__all__ = ['AdminCommands', 'Template']
+__all__ = ['Template']
 
-from core.admin.commands import AdminCommands
 from core.admin.templates import Template

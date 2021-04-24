@@ -4,6 +4,8 @@ import time
 from pony.orm.core import PrimaryKey, Required, Database, Optional
 
 # create database instance
+from pony.py23compat import unicode
+
 database: Database = Database()
 
 
@@ -37,9 +39,15 @@ class BannedChannel(database.Entity):
     id = PrimaryKey(int, auto=True)
     channel = Required(str)
 
+class EmoteRoleSettings(database.Entity):
+    _table_ = 'emote_role_setting'
+    role_id = PrimaryKey(str)
+    emote = Required(str)
+    text = Required(str)
+    min_level = Required(int, sql_default='-1')
 
 # connect to database and generate needed tables
 database.bind(provider='mysql', host=os.getenv('PAPERBOT.DATABASE.HOST'), user=os.getenv('PAPERBOT.DATABASE.USER'),
-              passwd=os.getenv('PAPERBOT.DATABASE.PASSWD'), db=os.getenv('PAPERBOT.DATABASE.DB'))
+              passwd=os.getenv('PAPERBOT.DATABASE.PASSWD'), db=os.getenv('PAPERBOT.DATABASE.DB'), charset='utf8mb4')
 
 database.generate_mapping(create_tables=True)

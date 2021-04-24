@@ -1,16 +1,24 @@
 import os
-from typing import List
 
-from discord import Member, Guild, Emoji, TextChannel, Message
+from discord import Guild, Emoji, TextChannel, Message
 from discord.ext import commands
+from pony.orm import select, db_session
 
 from core import Database
-from core.role import ROLES_LEVEL, EMOTE_ROLES, EmoteRoleSettings
+from core.models.models import UserInfo, EmoteRoleSettings
 
 
 class Roles(commands.Cog):
+
+    @db_session
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.emote_roles = list(EmoteRoleSettings.select())
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # await self.update_reaction_msg(int(os.getenv('PAPERBOT.DISCORD.ROLE_CHANNEL')))
+        pass
 
     # handle added reactions
     @commands.Cog.listener()
@@ -23,8 +31,8 @@ class Roles(commands.Cog):
         await self.handle_role_reactions(payload)
 
     # update role message and add reactions
-    async def update_reaction_msg(self, roleChannel, emote_roles: List[EmoteRoleSettings]):
-        channel: TextChannel = self.bot.get_channel(id=roleChannel)
+    async def update_reaction_msg(self, role_channel: int):
+        channel: TextChannel = self.bot.get_channel(id=role_channel)
         guild: Guild = channel.guild
         msg: Message = None
 
@@ -38,84 +46,62 @@ class Roles(commands.Cog):
                     await msg.remove_reaction(emote.emoji, self.bot.user)
         else:
             msg = await channel.send(
-                "Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und "
-                "wieder nehmen könnt. :boomerang:")
+                "Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und wieder nehmen könnt. :boomerang:")
 
-        string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder " \
-                 "nehmen könnt:\n "
-        for emote_role in emote_roles:
-            role = guild.get_role(role_id=emote_role.role_id)
+        string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n "
+        for emote_role in self.emote_roles:
+            role = guild.get_role(role_id=int(emote_role.role_id))
 
             string_role = 'Rolle %s, %s' % (role.mention, emote_role.emote)
             await msg.add_reaction(emote_role.emote)
 
             string = string + "\n" + emote_role.text
-            if emote_role.role_id in ROLES_LEVEL:
-                string = "%s (mindestens Level %d)" % (string, ROLES_LEVEL.get(emote_role.role_id))
+            if emote_role.min_level != -1:
+                string = "%s (mindestens Level %d)" % (string, emote_role.min_level)
 
         await msg.edit(content=string)
 
     # handle role reactions
     async def handle_role_reactions(self, payload):
-        if payload.channel_id == os.getenv('PAPERBOT.DISCORD.ROLE_CHANNEL'):
+        if payload.channel_id == int(os.getenv('PAPERBOT.DISCORD.ROLE_CHANNEL')):
             emoji: Emoji = payload.emoji
             guild: Guild = self.bot.get_guild(id=payload.guild_id)
-            user: Member = None
-            emote_roles: List[EmoteRoleSettings]
+
             level = 0
-            level_channel: TextChannel
+            level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv('PAPERBOT.DISCORD.LEVEL_CHANNEL')))
 
             Database.log("Check guild %s" % guild.name)
             Database.log("Check members")
-            for member in guild.members:
-                Database.log("Check member %s" % member.name)
 
-                if member.id == payload.user_id:
-                    Database.log("User found")
-                    user = member
-                    break
-
-            if user == self.bot.user:
-                return
+            # checks all guild members to find the one who reacted or get None
+            user = guild.get_member(payload.user_id)
 
             if user is None:
-                Database.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
-                return
+                return Database.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
 
-            emote_roles = EMOTE_ROLES
-            level_channel = self.bot.get_channel(id=int(os.getenv('PAPERBOT.DISCORD.LEVEL_CHANNEL')))
+            with db_session:
+                query = select(u.level for u in UserInfo).where(lambda u: u.id == user.id)
 
-            result = Database.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
-            if result.rowcount > 0:
-                level = result.fetchone()[0]
+                if query.exists():
+                    level = query.get()
 
-            chosen_emote_role: EmoteRoleSettings
-            emote_role_matches: List[EmoteRoleSettings] = list(
-                filter(lambda emote_role: emote_role.emote == emoji.name, emote_roles))  # Get matching emote
-            if len(emote_role_matches) <= 0:
-                # If not match was found, return
+            # find the reaction emote/ the role
+            emote_role = [e for e in self.emote_roles if e.emote == emoji.name]
+            if len(emote_role) <= 0:
                 return Database.log("No emote found")
-            else:
-                chosen_emote_role = emote_role_matches[0]
 
-            role = guild.get_role(role_id=chosen_emote_role.role_id)
+            emote: EmoteRoleSettings = emote_role[0]
+            role = guild.get_role(role_id=int(emote.role_id))
             Database.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
 
-            role: Roles
             if role in user.roles:
                 Database.log("Role " + role.name + " removed from " + user.name)
-                await user.remove_roles(role)
-            else:
-                if chosen_emote_role.role_id in ROLES_LEVEL:
-                    if level >= ROLES_LEVEL.get(chosen_emote_role.role_id):
-                        Database.log("Role " + role.name + " with min-level " + str(
-                            ROLES_LEVEL.get(chosen_emote_role.role_id)) + " assigned to " + user.name)
-                        await user.add_roles(role)
-                    else:
-                        await level_channel.send(
-                            user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(
-                                ROLES_LEVEL.get(
-                                    chosen_emote_role.role_id)) + ") für die Rolle " + role.name + " nicht!")
-                else:
-                    Database.log("Role " + role.name + " assigned to " + user.name)
-                    await user.add_roles(role)
+                return await user.remove_roles(role)
+
+            if level >= emote.min_level:
+                Database.log("Role " + role.name + " with min-level " + str(
+                    emote.min_level) + " assigned to " + user.name)
+                return await user.add_roles(role)
+
+            return await level_channel.send(
+                user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(emote.min_level) + ") für die Rolle " + role.name + " nicht!")

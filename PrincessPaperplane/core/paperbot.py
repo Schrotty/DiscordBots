@@ -11,6 +11,7 @@ from discord.ext.commands import Bot
 import extension
 from core import Database
 from core.rank.rank import Rank
+from core.role.roles import Roles
 from utility.terminal import Terminal
 
 
@@ -21,7 +22,7 @@ class Paperbot(Bot):
         # log.setup()
         # self.add_cog(AdminCommands(self))
         self.add_cog(Rank(self))
-        # self.add_cog(Roles(self))
+        self.add_cog(Roles(self))
 
     def boot(self):
         Terminal.print('Starting PaperBot...')

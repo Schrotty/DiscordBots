@@ -6,6 +6,7 @@ from MySQLdb.cursors import Cursor
 from pony.orm import db_session
 
 from core.models.models import LogInfo
+from utility.terminal import Terminal
 
 
 class Database:
@@ -49,6 +50,7 @@ class Database:
         """
 
         # logging.getLogger('paperbot').error(message)
+        Terminal.print(message)
         LogInfo(text=message)
 
     @staticmethod

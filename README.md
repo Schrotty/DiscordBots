@@ -1,4 +1,6 @@
 # DiscordBots
+[![Lint](https://github.com/Schrotty/DiscordBots/actions/workflows/lint.yml/badge.svg)](https://github.com/Schrotty/DiscordBots/actions/workflows/lint.yml)
+[![CodeQL](https://github.com/Schrotty/DiscordBots/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Schrotty/DiscordBots/actions/workflows/codeql-analysis.yml)
 
 These are Discord-Bots created in Python 3 to provide features like Voicechannel-creation and personalized bots like the
 PrincessPaperplane-bot for the PrincessPaperplane-Discordserver.

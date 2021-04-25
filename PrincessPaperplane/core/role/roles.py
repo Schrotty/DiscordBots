@@ -4,8 +4,8 @@ from discord import Guild, Emoji, TextChannel, Message
 from discord.ext import commands
 from pony.orm import select, db_session
 
-from core import Database
 from core.models.models import UserInfo, EmoteRoleSettings
+from core.role.templates import Template
 
 
 class Roles(commands.Cog):
@@ -33,7 +33,6 @@ class Roles(commands.Cog):
     # update role message and add reactions
     async def update_reaction_msg(self, role_channel: int):
         channel: TextChannel = self.bot.get_channel(id=role_channel)
-        guild: Guild = channel.guild
         msg: Message = None
 
         async for message in channel.history(limit=200):
@@ -45,14 +44,10 @@ class Roles(commands.Cog):
                 if emote.me:
                     await msg.remove_reaction(emote.emoji, self.bot.user)
         else:
-            msg = await channel.send(
-                "Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und wieder nehmen könnt. :boomerang:")
+            msg = await channel.send(Template.TMP_MESSAGE)
 
-        string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n "
+        string = Template.ROLE_MESSAGE
         for emote_role in self.emote_roles:
-            role = guild.get_role(role_id=int(emote_role.role_id))
-
-            string_role = 'Rolle %s, %s' % (role.mention, emote_role.emote)
             await msg.add_reaction(emote_role.emote)
 
             string = string + "\n" + emote_role.text
@@ -70,38 +65,26 @@ class Roles(commands.Cog):
             level = 0
             level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv('PAPERBOT.DISCORD.LEVEL_CHANNEL')))
 
-            Database.log("Check guild %s" % guild.name)
-            Database.log("Check members")
-
             # checks all guild members to find the one who reacted or get None
             user = guild.get_member(payload.user_id)
 
-            if user is None:
-                return Database.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
+            if user is not None:
+                with db_session:
+                    query = select(u.level for u in UserInfo).where(lambda u: u.id == user.id)
 
-            with db_session:
-                query = select(u.level for u in UserInfo).where(lambda u: u.id == user.id)
+                    if query.exists():
+                        level = query.get()
 
-                if query.exists():
-                    level = query.get()
+                # find the reaction emote/ the role
+                emote_role = [e for e in self.emote_roles if e.emote == emoji.name]
+                if len(emote_role) > 0:
+                    emote: EmoteRoleSettings = emote_role[0]
+                    role = guild.get_role(role_id=int(emote.role_id))
 
-            # find the reaction emote/ the role
-            emote_role = [e for e in self.emote_roles if e.emote == emoji.name]
-            if len(emote_role) <= 0:
-                return Database.log("No emote found")
+                    if role in user.roles:
+                        return await user.remove_roles(role)
 
-            emote: EmoteRoleSettings = emote_role[0]
-            role = guild.get_role(role_id=int(emote.role_id))
-            Database.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
+                    if level >= emote.min_level:
+                        return await user.add_roles(role)
 
-            if role in user.roles:
-                Database.log("Role " + role.name + " removed from " + user.name)
-                return await user.remove_roles(role)
-
-            if level >= emote.min_level:
-                Database.log("Role " + role.name + " with min-level " + str(
-                    emote.min_level) + " assigned to " + user.name)
-                return await user.add_roles(role)
-
-            return await level_channel.send(
-                user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(emote.min_level) + ") für die Rolle " + role.name + " nicht!")
+                    return await level_channel.send(Template.LEVEL_TO_LOW.format(MENTION=user.mention, LEVEL=level, MIN_LEVEL=emote.min_level, ROLE=role.name))

@@ -12,6 +12,7 @@ import extension
 from core import Database
 from core.rank.rank import Rank
 from core.role.roles import Roles
+from utility import log
 from utility.terminal import Terminal
 
 
@@ -19,7 +20,7 @@ class Paperbot(Bot):
     def __init__(self, command_prefix, **options):
         super().__init__(command_prefix, **options)
 
-        # log.setup()
+        log.setup()
         # self.add_cog(AdminCommands(self))
         self.add_cog(Rank(self))
         self.add_cog(Roles(self))

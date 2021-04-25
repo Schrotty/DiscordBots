@@ -9,7 +9,7 @@ from pony.orm import db_session, select, desc
 
 from core.database import Database
 from core.models.models import BannedChannel, UserInfo, LevelReward
-from core.rank.experience import *
+from core.rank.experience import RANDOM_RANGE, BASE, COOLDOWN
 from core.rank.templates import Template
 from utility.checks import Checks
 

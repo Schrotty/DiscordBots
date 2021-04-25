@@ -4,8 +4,6 @@ import time
 from pony.orm.core import PrimaryKey, Required, Database, Optional
 
 # create database instance
-from pony.py23compat import unicode
-
 database: Database = Database()
 
 

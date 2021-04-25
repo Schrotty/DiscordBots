@@ -1,3 +1,3 @@
-__all__ = ['Database']
+__all__ = ["Database"]
 
 from core.database import Database

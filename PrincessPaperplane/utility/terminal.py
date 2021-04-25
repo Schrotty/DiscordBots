@@ -7,8 +7,8 @@ class Terminal:
 
     @staticmethod
     def print(message: Any):
-        print(f'> {message}')
+        print(f"> {message}")
 
     @staticmethod
     def empty():
-        print('')
+        print("")

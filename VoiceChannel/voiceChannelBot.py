@@ -4,7 +4,7 @@
 import discord
 from discord.ext import commands
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix="!")
 
 
 @bot.event
@@ -21,14 +21,18 @@ async def on_voice_state_update(member, before, after):
         # Joined creation channel
         if after.channel.id == VOICE_CREATE.id:
             channelname = member.name + "'s Sprachchannel"
-            voice = await VOICE_CREATE.category.create_voice_channel(channelname, overwrites=None,
-                                                                     reason="Created by user")
+            voice = await VOICE_CREATE.category.create_voice_channel(
+                channelname, overwrites=None, reason="Created by user"
+            )
             await voice.set_permissions(member, read_messages=True, send_messages=False)
             await member.move_to(voice)
 
     if before.channel is not None:
         # Delete if channel is empty
-        if before.channel.category == VOICE_CREATE.category and before.channel.id != VOICE_CREATE.id:
+        if (
+            before.channel.category == VOICE_CREATE.category
+            and before.channel.id != VOICE_CREATE.id
+        ):
             if len(before.channel.members) == 0:
                 await before.channel.delete(reason="Empty user channel")
 

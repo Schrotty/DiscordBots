@@ -9,7 +9,6 @@ from core.role.templates import Template
 
 
 class Roles(commands.Cog):
-
     @db_session
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -58,19 +57,23 @@ class Roles(commands.Cog):
 
     # handle role reactions
     async def handle_role_reactions(self, payload):
-        if payload.channel_id == int(os.getenv('PAPERBOT.DISCORD.ROLE_CHANNEL')):
+        if payload.channel_id == int(os.getenv("PAPERBOT.DISCORD.ROLE_CHANNEL")):
             emoji: Emoji = payload.emoji
             guild: Guild = self.bot.get_guild(id=payload.guild_id)
 
             level = 0
-            level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv('PAPERBOT.DISCORD.LEVEL_CHANNEL')))
+            level_channel: TextChannel = self.bot.get_channel(
+                id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL"))
+            )
 
             # checks all guild members to find the one who reacted or get None
             user = guild.get_member(payload.user_id)
 
             if user is not None:
                 with db_session:
-                    query = select(u.level for u in UserInfo).where(lambda u: u.id == user.id)
+                    query = select(u.level for u in UserInfo).where(
+                        lambda u: u.id == user.id
+                    )
 
                     if query.exists():
                         level = query.get()
@@ -87,4 +90,11 @@ class Roles(commands.Cog):
                     if level >= emote.min_level:
                         return await user.add_roles(role)
 
-                    return await level_channel.send(Template.LEVEL_TO_LOW.format(MENTION=user.mention, LEVEL=level, MIN_LEVEL=emote.min_level, ROLE=role.name))
+                    return await level_channel.send(
+                        Template.LEVEL_TO_LOW.format(
+                            MENTION=user.mention,
+                            LEVEL=level,
+                            MIN_LEVEL=emote.min_level,
+                            ROLE=role.name,
+                        )
+                    )

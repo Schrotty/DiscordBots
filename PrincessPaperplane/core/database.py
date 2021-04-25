@@ -10,7 +10,6 @@ from utility.terminal import Terminal
 
 
 class Database:
-
     @staticmethod
     def connect() -> MySQLdb.Connection:
         """Connect to database
@@ -18,12 +17,14 @@ class Database:
         Returns:
             [type]: Connection to database
         """
-        return MySQLdb.connect(host=os.getenv("PAPERBOT.DATABASE.HOST"),
-                               user=os.getenv("PAPERBOT.DATABASE.USER"),
-                               charset="utf8mb4",
-                               use_unicode=True,
-                               passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
-                               db=os.getenv("PAPERBOT.DATABASE.DB"))
+        return MySQLdb.connect(
+            host=os.getenv("PAPERBOT.DATABASE.HOST"),
+            user=os.getenv("PAPERBOT.DATABASE.USER"),
+            charset="utf8mb4",
+            use_unicode=True,
+            passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
+            db=os.getenv("PAPERBOT.DATABASE.DB"),
+        )
 
     @staticmethod
     def execute(query: Any, args: Any = None) -> Any:
@@ -55,7 +56,7 @@ class Database:
 
     @staticmethod
     def ignored_user() -> list:
-        result = Database.execute('SELECT id FROM ignored_user')
+        result = Database.execute("SELECT id FROM ignored_user")
         if result.rowcount > 0:
             return [int(i[0]) for i in result.fetchall()]
 
@@ -63,7 +64,7 @@ class Database:
 
     @staticmethod
     def level_banned_channel() -> list:
-        result = Database.execute('SELECT channel FROM level_banned_channel')
+        result = Database.execute("SELECT channel FROM level_banned_channel")
         if result.rowcount > 0:
             return [int(i[0]) for i in result.fetchall()]
 

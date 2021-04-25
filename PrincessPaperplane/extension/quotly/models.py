@@ -15,6 +15,11 @@ class Quote(database.Entity):
 
 
 # connect to database and generate needed tables
-database.bind(provider='mysql', host=os.getenv('PAPERBOT.DATABASE.HOST'), user=os.getenv('PAPERBOT.DATABASE.USER'),
-              passwd=os.getenv('PAPERBOT.DATABASE.PASSWD'), db=os.getenv('PAPERBOT.DATABASE.DB'))
+database.bind(
+    provider="mysql",
+    host=os.getenv("PAPERBOT.DATABASE.HOST"),
+    user=os.getenv("PAPERBOT.DATABASE.USER"),
+    passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
+    db=os.getenv("PAPERBOT.DATABASE.DB"),
+)
 database.generate_mapping(create_tables=True)

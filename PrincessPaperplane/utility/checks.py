@@ -4,7 +4,6 @@ from discord.ext import commands
 
 
 class Checks:
-
     @staticmethod
     def is_not_in_list(user_list: list):
         async def predicate(ctx):
@@ -26,7 +25,9 @@ class Checks:
 
         # Define predicate to be checked
         async def predicate(ctx):
-            if ctx.guild.id == check_on_server_id and ctx.channel.id != channel_id:  # only allow !rank / !rang in
+            if (
+                ctx.guild.id == check_on_server_id and ctx.channel.id != channel_id
+            ):  # only allow !rank / !rang in
                 # #bod_spam
                 return False
             else:

@@ -1,3 +1,3 @@
-__all__ = ['Template']
+__all__ = ["Template"]
 
 from core.admin.templates import Template

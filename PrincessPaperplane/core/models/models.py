@@ -21,7 +21,9 @@ class UserInfo(database.Entity):
     _table_ = "user_info"
     id = PrimaryKey(str)
     name = Required(str)
-    avatar_url = Optional(str, sql_default="'https://fireabend.community/img/default.png'")
+    avatar_url = Optional(
+        str, sql_default="'https://fireabend.community/img/default.png'"
+    )
     exp = Optional(int, sql_default=0)
     level = Optional(int, sql_default=0)
     exp_time = Optional(int, sql_default=0)
@@ -39,15 +41,23 @@ class BannedChannel(database.Entity):
     id = PrimaryKey(int, auto=True)
     channel = Required(str)
 
+
 class EmoteRoleSettings(database.Entity):
-    _table_ = 'emote_role_setting'
+    _table_ = "emote_role_setting"
     role_id = PrimaryKey(str)
     emote = Required(str)
     text = Required(str)
-    min_level = Required(int, sql_default='-1')
+    min_level = Required(int, sql_default="-1")
+
 
 # connect to database and generate needed tables
-database.bind(provider='mysql', host=os.getenv('PAPERBOT.DATABASE.HOST'), user=os.getenv('PAPERBOT.DATABASE.USER'),
-              passwd=os.getenv('PAPERBOT.DATABASE.PASSWD'), db=os.getenv('PAPERBOT.DATABASE.DB'), charset='utf8mb4')
+database.bind(
+    provider="mysql",
+    host=os.getenv("PAPERBOT.DATABASE.HOST"),
+    user=os.getenv("PAPERBOT.DATABASE.USER"),
+    passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
+    db=os.getenv("PAPERBOT.DATABASE.DB"),
+    charset="utf8mb4",
+)
 
 database.generate_mapping(create_tables=True)

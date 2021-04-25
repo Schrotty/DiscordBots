@@ -17,9 +17,7 @@ class Quotly(Cog):
 
     @staticmethod
     async def post_quote(ctx: Context, quote: Quote):
-        await ctx.channel.send(
-            Template.QUOTE.format(ID=quote.id, QUOTE=quote.text, AUTHOR=quote.author)
-        )
+        await ctx.channel.send(Template.QUOTE.format(ID=quote.id, QUOTE=quote.text, AUTHOR=quote.author))
 
     @staticmethod
     @db_session
@@ -42,9 +40,7 @@ class Quotly(Cog):
 
             await self.post_quote(ctx, quote)
 
-    @quote.command(
-        aliases=Template.ALIAS, name=Template.COMMAND_NAME, help=Template.HELP_TEXT
-    )
+    @quote.command(aliases=Template.ALIAS, name=Template.COMMAND_NAME, help=Template.HELP_TEXT)
     @commands.check_any(has_permission_for(CREATE_QUOTE), commands.is_owner())
     async def add_quote(self, ctx: Context, author: str = None, *, text: str = None):
         if author is None or text is None:
@@ -55,8 +51,6 @@ class Quotly(Cog):
     @add_quote.error
     async def add_quote_error(self, ctx: Context, error):
         if isinstance(error, commands.CheckFailure):
-            return await ctx.send(
-                Template.MISSING_PERMISSION.format(MENTION=ctx.author.mention)
-            )
+            return await ctx.send(Template.MISSING_PERMISSION.format(MENTION=ctx.author.mention))
 
         await ctx.send(str(error))

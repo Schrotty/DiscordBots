@@ -29,10 +29,7 @@ async def on_voice_state_update(member, before, after):
 
     if before.channel is not None:
         # Delete if channel is empty
-        if (
-            before.channel.category == VOICE_CREATE.category
-            and before.channel.id != VOICE_CREATE.id
-        ):
+        if before.channel.category == VOICE_CREATE.category and before.channel.id != VOICE_CREATE.id:
             if len(before.channel.members) == 0:
                 await before.channel.delete(reason="Empty user channel")
 

@@ -12,18 +12,14 @@ class Dice(Cog):
         self.bot.add_listener(self.on_message)
 
         prefixes_regex = "(" + "|".join(os.getenv("PAPERBOT.BOT.PREFIX")) + ")"
-        self.DICE_CMD_REGEX = re.compile(
-            r"^({prefix})([w,d]\d)".format(prefix=prefixes_regex)
-        )
+        self.DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d]\d)".format(prefix=prefixes_regex))
 
     async def on_message(self, message):
         match = self.DICE_CMD_REGEX.match(message.content)
         if bool(match):
             # Split message content: !w6x8 becomes !w 6x8. Important for command extension, so it can extract parameters
             cmd_length = len(match.group(1)) + len(match.group(2))
-            message.content = (
-                message.content[:cmd_length] + " " + message.content[cmd_length:]
-            )
+            message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
 
             await self.bot.process_commands(message)
 

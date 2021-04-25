@@ -9,9 +9,7 @@ class Wool(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(
-        aliases=Templates.ALIAS, name=Templates.COMMAND_NAME, help=Templates.HELP_TEXT
-    )
+    @commands.command(aliases=Templates.ALIAS, name=Templates.COMMAND_NAME, help=Templates.HELP_TEXT)
     async def wool(self, ctx: Context, user: User):
         await ctx.channel.send(Templates.RESPONSE.format(user.mention))
 

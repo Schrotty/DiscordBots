@@ -47,15 +47,9 @@ class Paperbot(Bot):
 
         Terminal.print("Loaded configuration follows:")
 
-        Terminal.print(
-            f'- LEVEL_CHANNEL -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))}'
-        )
-        Terminal.print(
-            f'- BOT_CHANNEL   -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.BOT_CHANNEL")))}'
-        )
-        Terminal.print(
-            f'- ROLE_CHANNEL  -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.ROLE_CHANNEL")))}'
-        )
+        Terminal.print(f'- LEVEL_CHANNEL -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))}')
+        Terminal.print(f'- BOT_CHANNEL   -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.BOT_CHANNEL")))}')
+        Terminal.print(f'- ROLE_CHANNEL  -> {self.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.ROLE_CHANNEL")))}')
         Terminal.empty()
 
         Terminal.print("Connected to")
@@ -66,9 +60,7 @@ class Paperbot(Bot):
 
         await self.change_presence(
             status=discord.Status.online,
-            activity=discord.Activity(
-                name="twitch.tv/princesspaperplane", type=discord.ActivityType.watching
-            ),
+            activity=discord.Activity(name="twitch.tv/princesspaperplane", type=discord.ActivityType.watching),
         )
 
         Terminal.print("Loading Extensions:")

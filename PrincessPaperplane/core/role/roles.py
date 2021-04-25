@@ -62,18 +62,14 @@ class Roles(commands.Cog):
             guild: Guild = self.bot.get_guild(id=payload.guild_id)
 
             level = 0
-            level_channel: TextChannel = self.bot.get_channel(
-                id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL"))
-            )
+            level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))
 
             # checks all guild members to find the one who reacted or get None
             user = guild.get_member(payload.user_id)
 
             if user is not None:
                 with db_session:
-                    query = select(u.level for u in UserInfo).where(
-                        lambda u: u.id == user.id
-                    )
+                    query = select(u.level for u in UserInfo).where(lambda u: u.id == user.id)
 
                     if query.exists():
                         level = query.get()

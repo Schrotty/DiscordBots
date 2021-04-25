@@ -15,9 +15,7 @@ class PermissionMixin(object):
         user_roles = [r.id for r in member.roles]
 
         return list(
-            select(p.permission for p in Permission).where(
-                lambda p: p.value == member.id or p.value in user_roles
-            )
+            select(p.permission for p in Permission).where(lambda p: p.value == member.id or p.value in user_roles)
         )
 
 

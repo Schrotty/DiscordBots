@@ -15,9 +15,7 @@ class AdminCommands(Cog):
         result = Database.level_banned_channel()
         if len(result) > 0:
             return await ctx.send(
-                Template.LIST_BANNED_CHANNEL.format(
-                    CHANNEL=", ".join([ctx.bot.get_channel(id=i).name for i in result])
-                )
+                Template.LIST_BANNED_CHANNEL.format(CHANNEL=", ".join([ctx.bot.get_channel(id=i).name for i in result]))
             )
 
         await ctx.send(Template.NO_BANNED_CHANNEL)
@@ -31,13 +29,9 @@ class AdminCommands(Cog):
             ).rowcount
             == 0
         ):
-            result = Database.execute(
-                "INSERT INTO level_banned_channel (channel) VALUES (%s)", (channel.id,)
-            )
+            result = Database.execute("INSERT INTO level_banned_channel (channel) VALUES (%s)", (channel.id,))
             if result.rowcount > 0:
-                return await ctx.send(
-                    Template.CHANNEL_BANNED.format(CHANNEL=channel.name)
-                )
+                return await ctx.send(Template.CHANNEL_BANNED.format(CHANNEL=channel.name))
 
         await ctx.send(Template.CHANNEL_ALREADY_BANNED.format(CHANNEL=channel.name))
 
@@ -50,13 +44,9 @@ class AdminCommands(Cog):
             ).rowcount
             > 0
         ):
-            result = Database.execute(
-                "DELETE FROM level_banned_channel WHERE channel=%s", (channel.id,)
-            )
+            result = Database.execute("DELETE FROM level_banned_channel WHERE channel=%s", (channel.id,))
             if result.rowcount > 0:
-                return await ctx.send(
-                    Template.CHANNEL_ALLOWED.format(CHANNEL=channel.name)
-                )
+                return await ctx.send(Template.CHANNEL_ALLOWED.format(CHANNEL=channel.name))
 
         await ctx.send(Template.CHANNEL_ALREADY_ALLOWED.format(CHANNEL=channel.name))
 

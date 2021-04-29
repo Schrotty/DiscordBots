@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from random import randint
@@ -7,8 +8,7 @@ from discord.ext import commands
 from discord.ext.commands import Cog
 from pony.orm import db_session, select, desc
 
-from core.database import Database
-from core.models.models import BannedChannel, UserInfo, LevelReward
+from core.models.models import BannedChannel, UserInfo, LevelReward, IgnoredUser
 from core.rank.experience import RANDOM_RANGE, BASE, COOLDOWN
 from core.rank.templates import Template
 from utility.checks import Checks
@@ -17,9 +17,9 @@ from utility.checks import Checks
 class Rank(Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.logger = logging.getLogger("paperbot")
         self.base_xp = BASE
         self.random_xp_range = RANDOM_RANGE
-        self.ignored_user = Database.ignored_user()
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
@@ -31,14 +31,11 @@ class Rank(Cog):
         guild: Guild = message.guild
         level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))
 
-        if message.content == "" or len(message.content) == 0:
-            return
-        if author.id in self.ignored_user:
-            return
-        if author.id == self.bot.user.id:
-            return
-
         with db_session:
+
+            if message.content == "" or len(message.content) == 0: return
+            if IgnoredUser.select(lambda u: u.id == author.id).exists(): return
+            if author.id == self.bot.user.id: return
 
             # check for banned channels to handle XP and level up
             if not BannedChannel.select(lambda c: c.channel == channel.id).exists():
@@ -60,7 +57,7 @@ class Rank(Cog):
                     user_info.exp = user_info.exp + self.calc_xp_reward()
 
                     level_up = self.get_level_up_threshold(user_info.level)
-                    Database.log(Template.GAINED_EP_LOG_MSG.format(GAINED=level_up, CURRENT=user_info.exp))
+                    self.logger.debug(Template.GAINED_EP_LOG_MSG.format(GAINED=level_up, CURRENT=user_info.exp))
 
                     # missing reward-role check
                     role_high: LevelReward = (
@@ -94,7 +91,7 @@ class Rank(Cog):
 
                             # give user new role as reward
                             if role not in author.roles:
-                                Database.log(Template.NEW_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=role.name))
+                                self.logger.debug(Template.NEW_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=role.name))
                                 await author.add_roles(role)
 
                             # remove old reward-roles
@@ -113,7 +110,7 @@ class Rank(Cog):
 
                             for r in old_roles:
                                 if r in author.roles:
-                                    Database.log(Template.REMOVE_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=r.name))
+                                    self.logger.debug(Template.REMOVE_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=r.name))
                                     await author.remove_roles(r)
 
     @staticmethod

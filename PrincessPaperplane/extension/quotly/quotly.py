@@ -7,8 +7,8 @@ from extension.quotly.models import Quote
 from extension.quotly.templates import Template
 
 # permissions
-CREATE_QUOTE: str = f"{__name__}.CREATE_QUOTE"
-FETCH_QUOTE: str = f"{__name__}.FETCH_QUOTE"
+CREATE_QUOTE: str = "quotly.CREATE_QUOTE"
+FETCH_QUOTE: str = "quotly.FETCH_QUOTE"
 
 
 class Quotly(Cog):

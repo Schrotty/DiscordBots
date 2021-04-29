@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-
-
+import logging
 import os
 
 import discord
@@ -9,10 +8,10 @@ from discord import Message, ChannelType
 from discord.ext.commands import Bot
 
 import extension
-from core import Database
+from core import logger
+from core.admin.commands import AdminCommands
 from core.rank.rank import Rank
 from core.role.roles import Roles
-from utility import log
 from utility.terminal import Terminal
 
 
@@ -20,8 +19,8 @@ class Paperbot(Bot):
     def __init__(self, command_prefix, **options):
         super().__init__(command_prefix, **options)
 
-        log.setup()
-        # self.add_cog(AdminCommands(self))
+        self.logger = logging.getLogger("paperbot")
+        self.add_cog(AdminCommands(self))
         self.add_cog(Rank(self))
         self.add_cog(Roles(self))
 
@@ -41,7 +40,7 @@ class Paperbot(Bot):
     async def on_ready(self):
         self.user.name = "PaperBot"
 
-        Database.log("Bot started")
+        self.logger.debug("Bot started")
         Terminal.print(f"Logged in as {self.user.name}#{self.user.id}")
         Terminal.empty()
 

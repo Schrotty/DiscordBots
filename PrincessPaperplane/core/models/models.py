@@ -6,7 +6,6 @@ from pony.orm.core import PrimaryKey, Required, Database, Optional
 # create database instance
 database: Database = Database()
 
-
 # define models needed for extension
 class LogInfo(database.Entity):
     _table_ = "log_info"
@@ -44,6 +43,11 @@ class EmoteRoleSettings(database.Entity):
     emote = Required(str)
     text = Required(str)
     min_level = Required(int, sql_default="-1")
+
+
+class IgnoredUser(database.Entity):
+    _table_ = "ignored_user"
+    id = PrimaryKey(str)
 
 
 # connect to database and generate needed tables

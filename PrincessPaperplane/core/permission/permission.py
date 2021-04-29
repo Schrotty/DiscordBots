@@ -6,9 +6,9 @@ from pony.orm import Database, PrimaryKey, Required, db_session, select
 # create database instance
 database: Database = Database()
 
-
 # define mixin for additional methods
 class PermissionMixin(object):
+
     @staticmethod
     @db_session
     def get_permissions_for_user(member: Member):
@@ -35,4 +35,5 @@ database.bind(
     passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
     db=os.getenv("PAPERBOT.DATABASE.DB"),
 )
+
 database.generate_mapping(create_tables=True)

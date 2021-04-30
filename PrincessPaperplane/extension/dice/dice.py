@@ -1,9 +1,12 @@
 import os
 import re
-from random import randint
+from random import sample, choices
+from typing import Optional
 
 from discord.ext import commands
 from discord.ext.commands import Bot, Cog
+
+from extension.dice.templates import Templates
 
 
 class Dice(Cog):
@@ -23,26 +26,49 @@ class Dice(Cog):
 
             await self.bot.process_commands(message)
 
-    @commands.command(aliases=["dice", "w", "d"])
+    @commands.command(aliases=Templates.DICE)
     async def cmd_dice(self, ctx: commands.Context, args):
         author = ctx.author
-        dice = int(args)
-        amount = 1
 
-        if "x" in args:
-            dice = int(args.split("x")[0])
-            amount = int(args.split("x")[1])
+        if 'x' in args:
+            dice = int(args.split('x')[0])
+            amount = int(args.split('x')[1])
+        else:
+            dice = int(args)
+            amount = 1
 
         if dice < 1 or amount < 1:
             return
 
+        # Get dice rolls
+        possible_numbers = range(1, dice + 1)
+        dice_rolls = choices(possible_numbers, k=amount)
+
         # print rolled dices
-        content = f"{author.mention} Du hast folgende Zahlen gewürfelt: "  # Leave whitespace at end!
-
-        for i in range(0, amount):
-            if i != 0:
-                content = f"{content}, "
-
-            content = f"{content}{str(randint(1, dice))}"
+        results = ", ".join(map(str, dice_rolls))
+        content = Templates.DICE_RESULT.format(MENTION=author.mention, RESULT=results)
 
         await ctx.channel.send(content=content)
+
+    @commands.command(aliases=Templates.RANDOM)
+    async def random(self, ctx: commands.Context, choice_amount: Optional[int] = 1, *args: str):
+        """Wählt zufälliges Element aus
+
+        Args:
+            ctx (commands.Context): [description]
+        """
+
+        mention: str = ctx.author.mention
+
+        # No values below zero
+        if choice_amount <= 0:
+            return await ctx.send(Templates.RANDOM_INVALID_NUMER.format(MENTION=mention))
+
+        # Choices have to be given
+        if args is None or len(args) <= 0:
+            return await ctx.send(Templates.RANDOM_NO_CHOICES.format(MENTION=mention))
+
+        choice_amount = min(choice_amount, len(args))  # Don't go over the amount of possible
+        choices = sample(population=args, k=choice_amount)
+
+        await ctx.send(f"{mention}, deine Zufallswahl: {', '.join(map(str, choices))}")

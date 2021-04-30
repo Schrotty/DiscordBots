@@ -14,6 +14,7 @@ from core.models.level_reward import LevelReward
 from core.models.user_info import UserInfo
 from core.rank.experience import RANDOM_RANGE, BASE, COOLDOWN
 from core.rank.templates import Template
+from utility.bool_parser import BoolParser
 from utility.checks import Checks
 
 
@@ -35,7 +36,6 @@ class Rank(Cog):
         level_channel: TextChannel = self.bot.get_channel(id=int(os.getenv("PAPERBOT.DISCORD.LEVEL_CHANNEL")))
 
         with db_session:
-
             if message.content == "" or len(message.content) == 0: return
             if IgnoredUser.select(lambda u: u.id == author.id).exists(): return
             if author.id == self.bot.user.id: return
@@ -172,3 +172,28 @@ class Rank(Cog):
         embed.set_image(url=url)
 
         return embed
+
+    @cmd_rank.group(aliases=Template.RANK_TRACK)
+    async def cmd_rank_track(self, ctx: commands.Context):
+        if ctx.invoked_subcommand is self.cmd_rank_track:
+            await ctx.send("Tracking Status noch nicht verfügbar")  # TODO: Display tracking status
+
+    @cmd_rank_track.command(aliases=Template.RANK_TRACK_TOGGLE.value)
+    async def cmd_rank_track_toggle(self, ctx: commands.Context, bool_value: BoolParser()):
+        """Toggles tracking based on argument
+        Args:
+            bool_value (BoolParser): String resolves to True,False or None
+        """
+        
+        content: str
+        mention = ctx.author.mention
+
+        if bool_value is None:
+            return await ctx.send(Template.RANK_TRACK_TOGGLE_BADARGS.format(MENTION=mention))
+
+        if bool_value:
+            content = Template.RANK_TRACK_TOGGLE_TRUE
+        else:
+            content = Template.RANK_TRACK_TOGGLE_FALSE
+
+        await ctx.send(content.format(MENTION=mention))

@@ -2,9 +2,10 @@ from discord.ext import commands
 from discord.ext.commands import Context, Cog, Bot
 from pony.orm import db_session
 
-from core.permission.checks import has_permission_for
 from extension.quotly.models import Quote
 from extension.quotly.templates import Template
+
+from utility import Checks
 
 # permissions
 CREATE_QUOTE: str = "quotly.CREATE_QUOTE"
@@ -30,7 +31,7 @@ class Quotly(Cog):
         return Quote(text=text, author=author)
 
     @commands.group()
-    @commands.check_any(has_permission_for(FETCH_QUOTE), commands.is_owner())
+    @commands.check_any(Checks.has_permission_for(FETCH_QUOTE), commands.is_owner())
     async def quote(self, ctx: Context):
         if ctx.invoked_subcommand is None:
             quote: Quote = self.fetch_quote()
@@ -41,7 +42,7 @@ class Quotly(Cog):
             await self.post_quote(ctx, quote)
 
     @quote.command(aliases=Template.ALIAS, name=Template.COMMAND_NAME, help=Template.HELP_TEXT)
-    @commands.check_any(has_permission_for(CREATE_QUOTE), commands.is_owner())
+    @commands.check_any(Checks.has_permission_for(CREATE_QUOTE), commands.is_owner())
     async def add_quote(self, ctx: Context, author: str = None, *, text: str = None):
         if author is None or text is None:
             return await ctx.channel.send(Template.ELEMENT_IS_MISSING)

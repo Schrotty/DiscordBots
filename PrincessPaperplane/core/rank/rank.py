@@ -8,7 +8,10 @@ from discord.ext import commands
 from discord.ext.commands import Cog
 from pony.orm import db_session, select, desc
 
-from core.models.models import BannedChannel, UserInfo, LevelReward, IgnoredUser
+from core.models.banned_channel import BannedChannel
+from core.models.ignored_user import IgnoredUser
+from core.models.level_reward import LevelReward
+from core.models.user_info import UserInfo
 from core.rank.experience import RANDOM_RANGE, BASE, COOLDOWN
 from core.rank.templates import Template
 from utility.checks import Checks
@@ -62,13 +65,13 @@ class Rank(Cog):
                     # missing reward-role check
                     role_high: LevelReward = (
                         LevelReward.select(lambda r: r.reward_level <= user_info.level)
-                        .order_by(lambda r: desc(r.reward_level))
-                        .first()
+                            .order_by(lambda r: desc(r.reward_level))
+                            .first()
                     )
                     role_low: LevelReward = (
                         LevelReward.select(lambda r: r.reward_level <= user_info.level)
-                        .order_by(lambda r: r.reward_level)
-                        .first()
+                            .order_by(lambda r: r.reward_level)
+                            .first()
                     )
 
                     if role_high is not None and role_low is not None:
@@ -110,7 +113,8 @@ class Rank(Cog):
 
                             for r in old_roles:
                                 if r in author.roles:
-                                    self.logger.debug(Template.REMOVE_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=r.name))
+                                    self.logger.debug(
+                                        Template.REMOVE_ROLE_LOG_MSG.format(AUTHOR=author.name, ROLE=r.name))
                                     await author.remove_roles(r)
 
     @staticmethod

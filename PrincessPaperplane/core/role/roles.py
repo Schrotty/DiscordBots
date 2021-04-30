@@ -4,7 +4,8 @@ from discord import Guild, Emoji, TextChannel, Message
 from discord.ext import commands
 from pony.orm import select, db_session
 
-from core.models.models import UserInfo, EmoteRoleSettings
+from core.models.emote_role_settings import EmoteRoleSettings
+from core.models.user_info import UserInfo
 from core.role.templates import Template
 
 

@@ -4,8 +4,8 @@ from discord.ext.commands import Cog, Bot, Context, CommandError
 from pony.orm import select, db_session
 
 from core.admin import Template
-from core.models.models import BannedChannel
-from core.permission import checks
+from core.models.banned_channel import BannedChannel
+from utility import Checks
 
 # permissions
 LIST_CHANNELS: str = "admin.banned.LIST_CHANNELS"
@@ -18,19 +18,20 @@ class AdminCommands(Cog):
         self.bot = bot
 
     @commands.command()
-    @checks.has_permission_for(LIST_CHANNELS)
+    @Checks.has_permission_for(LIST_CHANNELS)
     async def list_banned_channels(self, ctx: Context):
         with db_session:
             banned_channels = list(BannedChannel.select())
             if len(banned_channels) > 0:
                 return await ctx.send(
-                    Template.LIST_BANNED_CHANNEL.format(CHANNEL=", ".join([ctx.bot.get_channel(id=i).name for i in banned_channels]))
+                    Template.LIST_BANNED_CHANNEL.format(
+                        CHANNEL=", ".join([ctx.bot.get_channel(id=i).name for i in banned_channels]))
                 )
 
         await ctx.send(Template.NO_BANNED_CHANNEL)
 
     @commands.command()
-    @checks.has_permission_for(BAN_CHANNEL)
+    @Checks.has_permission_for(BAN_CHANNEL)
     async def ban_channel(self, ctx: Context, channel: TextChannel):
         with db_session:
             if not select(c for c in BannedChannel if c.channel == str(channel.id)).exists():
@@ -40,7 +41,7 @@ class AdminCommands(Cog):
         await ctx.send(Template.CHANNEL_ALREADY_BANNED.format(CHANNEL=channel.name))
 
     @commands.command()
-    @checks.has_permission_for(ALLOW_CHANNEL)
+    @Checks.has_permission_for(ALLOW_CHANNEL)
     async def allow_channel(self, ctx: Context, channel: TextChannel):
         with db_session:
             if select(c for c in BannedChannel if c.channel == str(channel.id)).exists():

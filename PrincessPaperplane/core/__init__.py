@@ -1,8 +1,22 @@
 import logging
 import os
 
+from pony.orm import Database
+
+# create database object and establish connection
+database: Database = Database()
+database.bind(
+    provider="mysql",
+    host=os.getenv("PAPERBOT.DATABASE.HOST"),
+    user=os.getenv("PAPERBOT.DATABASE.USER"),
+    passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
+    db=os.getenv("PAPERBOT.DATABASE.DB"),
+    charset="utf8mb4",
+)
+
 # create logs folder
-os.mkdir("logs/")
+if not os.path.exists("logs/"):
+    os.mkdir("logs/")
 
 # discord log config
 handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")

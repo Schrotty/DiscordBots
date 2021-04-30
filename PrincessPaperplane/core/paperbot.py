@@ -8,7 +8,7 @@ from discord import Message, ChannelType
 from discord.ext.commands import Bot
 
 import extension
-from core import logger
+from core import database
 from core.admin.commands import AdminCommands
 from core.rank.rank import Rank
 from core.role.roles import Roles
@@ -19,6 +19,10 @@ class Paperbot(Bot):
     def __init__(self, command_prefix, **options):
         super().__init__(command_prefix, **options)
 
+        # generate database mappings
+        database.generate_mapping(create_tables=True)
+
+        # register cogs
         self.logger = logging.getLogger("paperbot")
         self.add_cog(AdminCommands(self))
         self.add_cog(Rank(self))

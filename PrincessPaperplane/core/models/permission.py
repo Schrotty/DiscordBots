@@ -1,12 +1,9 @@
-import os
-
 from discord import Member
-from pony.orm import Database, PrimaryKey, Required, db_session, select
+from pony.orm import db_session, select, PrimaryKey, Required
 
-# create database instance
-database: Database = Database()
+from core import database
 
-# define mixin for additional methods
+
 class PermissionMixin(object):
 
     @staticmethod
@@ -25,15 +22,3 @@ class Permission(database.Entity, PermissionMixin):
     id = PrimaryKey(int, auto=True)
     value = Required(str)
     permission = Required(str)
-
-
-# connect to database and generate needed tables
-database.bind(
-    provider="mysql",
-    host=os.getenv("PAPERBOT.DATABASE.HOST"),
-    user=os.getenv("PAPERBOT.DATABASE.USER"),
-    passwd=os.getenv("PAPERBOT.DATABASE.PASSWD"),
-    db=os.getenv("PAPERBOT.DATABASE.DB"),
-)
-
-database.generate_mapping(create_tables=True)

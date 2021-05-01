@@ -3,7 +3,7 @@ from typing import Optional
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.models.permission import Permission
+from core.models.permission import EntityPermission
 
 
 class Checks:
@@ -11,7 +11,7 @@ class Checks:
     @staticmethod
     def has_permission_for(permission: str):
         async def predicate(ctx: Context):
-            return permission in Permission.get_permissions_for_user(ctx.author)
+            return permission in EntityPermission.get_permissions_for_user(ctx.author)
 
         return commands.check(predicate)
 

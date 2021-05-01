@@ -6,10 +6,12 @@ import os
 import discord
 from discord import Message, ChannelType
 from discord.ext.commands import Bot
+from pony.orm import db_session
 
 import extension
 from core import database
 from core.admin.commands import AdminCommands
+from core.models.permission import Permission
 from core.rank.rank import Rank
 from core.role.roles import Roles
 from utility.terminal import Terminal
@@ -32,6 +34,11 @@ class Paperbot(Bot):
         Terminal.print("Starting PaperBot...")
         if os.getenv("PAPERBOT.DISCORD.API") is None:
             return Terminal.print("Unable to locate API key!")
+
+        with db_session:
+            if not Permission.exists():
+                # store default roles
+                pass
 
         return self.run(os.getenv("PAPERBOT.DISCORD.API"))
 

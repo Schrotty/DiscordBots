@@ -5,7 +5,6 @@ from pony.orm.core import PrimaryKey, Required, Database
 # create database instance
 database: Database = Database()
 
-
 # define models needed for extension
 class Quote(database.Entity):
     _table_ = "quotes"

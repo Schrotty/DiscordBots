@@ -22,7 +22,7 @@ class BoolParser(commands.Converter):
         if false_strings is []:
             false_strings = BoolParser.FALSE_STRINGS
 
-        #Set to lower depending on is_case_senstivie
+        #Set to lower depending on is_case_sensitive
         if is_case_sensitive:
             self.true_strings = [true_string.lower() for true_string in true_strings]
             self.false_strings = [false_string.lower() for false_string in false_strings]
@@ -34,4 +34,4 @@ class BoolParser(commands.Converter):
         elif lowered in self.false_strings:
             return False
         else:
-            return None #None if none were catched
+            return None #None if none were caught

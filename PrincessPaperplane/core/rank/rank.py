@@ -173,12 +173,12 @@ class Rank(Cog):
 
         return embed
 
-    @cmd_rank.group(aliases=Template.RANK_TRACK)
+    @commands.group(aliases=Template.RANK_TRACK)
     async def cmd_rank_track(self, ctx: commands.Context):
         if ctx.invoked_subcommand is self.cmd_rank_track:
             await ctx.send("Tracking Status noch nicht verfügbar")  # TODO: Display tracking status
 
-    @cmd_rank_track.command(aliases=Template.RANK_TRACK_TOGGLE.value)
+    @cmd_rank_track.command(aliases=Template.RANK_TRACK_TOGGLE)
     async def cmd_rank_track_toggle(self, ctx: commands.Context, bool_value: BoolParser()):
         """Toggles tracking based on argument
         Args:

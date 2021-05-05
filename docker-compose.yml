@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  bot:
+    container_name: PaperBot
+    build: PrincessPaperplane
+    depends_on:
+      - database
+    links:
+      - "database:database"
+    volumes:
+      - .:/bot
+
+  database:
+    container_name: MariaDB
+    image: "mariadb"
+    restart: always
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/maria_root_pwd
+      MYSQL_USER_FILE: /run/secrets/maria_user
+      MYSQL_PASSWORD_FILE: /run/secrets/maria_user_pwd
+      MYSQL_DATABASE: princesspaperplane
+      MYSQL_ROOT_HOST: localhost
+    secrets:
+      - maria_root_pwd
+      - maria_user
+      - maria_user_pwd
+
+  adminer:
+    container_name: Adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_DESIGN: 'pappu687'
+
+secrets:
+  maria_root_pwd:
+    file: ./Database/maria_root_pwd
+  maria_user:
+    file: ./Database/maria_user
+  maria_user_pwd:
+    file: ./Database/maria_user_pwd

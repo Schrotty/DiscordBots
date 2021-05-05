@@ -1,0 +1,6 @@
+discord.py~=1.7.1
+requests~=2.25.1
+mysqlclient~=2.0.3
+python-dotenv~=0.17.0
+twitchio~=1.2.3
+pony~=0.7.14

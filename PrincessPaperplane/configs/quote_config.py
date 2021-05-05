@@ -1,2 +1,0 @@
-WRITE_ACCESS = []
-READ_ACCESS = []

@@ -1,11 +1,34 @@
 from typing import Optional
 
 from discord.ext import commands
+from discord.ext.commands import Context
+from pony.orm import db_session
 
-class Checks():
+from core.models.permission import EntityPermission, Permission
+
+
+class Checks:
 
     @staticmethod
-    def is_channel(channel_id : int, check_on_server_id : Optional[int] = -1):
+    def has_permission_for(permission: str):
+        async def predicate(ctx: Context):
+            with db_session:
+                if Permission.select(lambda p: p.value == permission).exists():
+                    return permission in EntityPermission.get_permissions_for_user(ctx.author)
+
+                return commands.is_owner()
+
+        return commands.check(predicate)
+
+    @staticmethod
+    def is_not_in_list(user_list: list):
+        async def predicate(ctx):
+            return ctx.message.author.id not in user_list
+
+        return commands.check(predicate)
+
+    @staticmethod
+    def is_channel(channel_id: int, check_on_server_id: Optional[int] = -1):
         """Checks if bot can accept commands in channel
 
         Args:
@@ -15,9 +38,11 @@ class Checks():
         Returns:
             [type]: Predicate
         """
-        #Define predicate to be checked
+
+        # Define predicate to be checked
         async def predicate(ctx):
-            if ctx.guild.id == check_on_server_id and ctx.channel.id != channel_id: # only allow !rank / !rang in #bod_spam
+            if ctx.guild.id == check_on_server_id and ctx.channel.id != channel_id:  # only allow !rank / !rang in
+                # #bod_spam
                 return False
             else:
                 return True

@@ -3,6 +3,7 @@ from pony.orm import db_session, select, PrimaryKey, Required
 
 from core import database
 
+
 class EntityPermissionMixin(object):
 
     @staticmethod
@@ -11,7 +12,8 @@ class EntityPermissionMixin(object):
         user_roles = [r.id for r in member.roles]
 
         return list(
-            select(p.permission for p in EntityPermission).where(lambda p: p.value == member.id or p.value in user_roles)
+            select(p.permission for p in EntityPermission).where(
+                lambda p: p.value == member.id or p.value in user_roles)
         )
 
 

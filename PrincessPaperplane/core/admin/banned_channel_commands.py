@@ -13,12 +13,12 @@ BAN_CHANNEL: str = "admin.banned.BAN_CHANNEL"
 ALLOW_CHANNEL: str = "admin.banned.ALLOW_CHANNEL"
 
 
-class AdminCommands(Cog):
+class BannedChannelCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
     @commands.command()
-    @Checks.has_permission_for(LIST_CHANNELS)
+    @commands.check_any(Checks.has_permission_for(LIST_CHANNELS))
     async def list_banned_channels(self, ctx: Context):
         with db_session:
             banned_channels = list(BannedChannel.select())
@@ -31,7 +31,7 @@ class AdminCommands(Cog):
         await ctx.send(Template.NO_BANNED_CHANNEL)
 
     @commands.command()
-    @Checks.has_permission_for(BAN_CHANNEL)
+    @commands.check_any(Checks.has_permission_for(BAN_CHANNEL))
     async def ban_channel(self, ctx: Context, channel: TextChannel):
         with db_session:
             if not select(c for c in BannedChannel if c.channel == str(channel.id)).exists():
@@ -41,7 +41,7 @@ class AdminCommands(Cog):
         await ctx.send(Template.CHANNEL_ALREADY_BANNED.format(CHANNEL=channel.name))
 
     @commands.command()
-    @Checks.has_permission_for(ALLOW_CHANNEL)
+    @commands.check_any(Checks.has_permission_for(ALLOW_CHANNEL))
     async def allow_channel(self, ctx: Context, channel: TextChannel):
         with db_session:
             if select(c for c in BannedChannel if c.channel == str(channel.id)).exists():

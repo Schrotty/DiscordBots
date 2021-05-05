@@ -2,8 +2,9 @@ from typing import Optional
 
 from discord.ext import commands
 from discord.ext.commands import Context
+from pony.orm import db_session
 
-from core.models.permission import EntityPermission
+from core.models.permission import EntityPermission, Permission
 
 
 class Checks:
@@ -11,7 +12,11 @@ class Checks:
     @staticmethod
     def has_permission_for(permission: str):
         async def predicate(ctx: Context):
-            return permission in EntityPermission.get_permissions_for_user(ctx.author)
+            with db_session:
+                if Permission.select(lambda p: p.value == permission).exists():
+                    return permission in EntityPermission.get_permissions_for_user(ctx.author)
+
+                return commands.is_owner()
 
         return commands.check(predicate)
 

@@ -10,7 +10,7 @@ from pony.orm import db_session
 
 import extension
 from core import database
-from core.admin.commands import AdminCommands
+from core.admin.banned_channel_commands import BannedChannelCommands
 from core.models.permission import Permission
 from core.rank.rank import Rank
 from core.role.roles import Roles
@@ -24,9 +24,13 @@ class Paperbot(Bot):
         # generate database mappings
         database.generate_mapping(create_tables=True)
 
-        # register cogs
         self.logger = logging.getLogger("paperbot")
-        self.add_cog(AdminCommands(self))
+
+        # register admin commands
+        self.add_cog(BannedChannelCommands(self))
+        # self.add_cog(PermissionCommands(self))
+
+        # register rand and roles
         self.add_cog(Rank(self))
         self.add_cog(Roles(self))
 

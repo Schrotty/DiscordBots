@@ -139,7 +139,7 @@ class Rank(Cog):
         author: Member = ctx.author
 
         with db_session:
-            user_info: UserInfo = UserInfo[str(author.id)]
+            user_info: UserInfo = UserInfo.select(lambda u: u.id == author.id).first()
 
             if user_info is None:
                 user_info = UserInfo(
@@ -151,8 +151,10 @@ class Rank(Cog):
                     avatar_url=str(author.avatar_url),
                 )
 
-        embed = self.create_rank_display_embed(author, user_info.level, user_info.exp)
-        await channel.send(embed=embed)
+        # embed = self.create_rank_display_embed(author, user_info.level, user_info.exp)
+        # await channel.send(embed=embed)
+
+        await channel.send(f"{author.mention} LEVEL: {user_info.level} XP: {user_info.exp}")
 
     def create_rank_display_embed(self, author: Member, level: int, exp: int) -> Embed:
         # generate image with stats
@@ -184,7 +186,7 @@ class Rank(Cog):
         Args:
             bool_value (BoolParser): String resolves to True,False or None
         """
-        
+
         content: str
         mention = ctx.author.mention
 

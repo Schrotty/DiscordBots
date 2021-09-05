@@ -2,7 +2,7 @@ from discord.ext.commands import Bot
 
 from utility.terminal import Terminal
 
-EXTENSIONS = ["dice", "quotly", "wool"]
+EXTENSIONS = ["dice", "quotly", "wool", "hltb"]
 
 
 def load_extensions(bot: Bot):

@@ -1,0 +1,8 @@
+hello:
+  emit: "Hello there!"
+
+tee:
+  emit: "{author} wants tea!"
+
+count:
+  emit: "We counted {counter} times!"

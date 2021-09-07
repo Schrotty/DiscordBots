@@ -11,7 +11,7 @@ class Wool(Cog):
 
     @commands.command(aliases=Templates.ALIAS, name=Templates.COMMAND_NAME, help=Templates.HELP_TEXT)
     async def wool(self, ctx: Context, user: User):
-        await ctx.channel.send(Templates.RESPONSE.format(user.mention))
+        await ctx.channel.send(Templates.RESPONSE.format(mention=user.mention))
 
     async def cog_command_error(self, ctx: Context, error):
         await ctx.send(str(error))

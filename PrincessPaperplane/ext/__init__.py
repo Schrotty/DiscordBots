@@ -10,3 +10,4 @@ def load_extensions(bot):
     bot.load_extension("ext.twitter_crawler")
     bot.load_extension("ext.wool_cmd")
     bot.load_extension("ext.hltb")
+    bot.load_extension("ext.cc")
